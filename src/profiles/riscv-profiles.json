@@ -1,0 +1,256 @@
+{
+  "metadata": {
+    "fetched_at": "2025-05-29T20:59:14.151067",
+    "release": {
+      "version": "riscv-isa-release-01e31a0-2025-05-28",
+      "name": "Release riscv-isa-release-01e31a0-2025-05-28",
+      "published_at": "2025-05-28T01:11:26+00:00",
+      "html_url": "https://github.com/riscv/riscv-isa-manual/releases/tag/riscv-isa-release-01e31a0-2025-05-28"
+    },
+    "specification_file": "profiles/riscv-spec-riscv-isa-release-01e31a0-2025-05-28.pdf"
+  },
+  "profiles": {
+    "RV32I": {
+      "description": "Base 32-bit integer instruction set",
+      "base_isa": "RV32I",
+      "mandatory_extensions": [
+        "I"
+      ],
+      "optional_extensions": [
+        "M",
+        "A",
+        "F",
+        "D",
+        "C",
+        "Zicsr",
+        "Zifencei"
+      ],
+      "status": "ratified",
+      "typical_use": "General purpose computing"
+    },
+    "RV64I": {
+      "description": "Base 64-bit integer instruction set",
+      "base_isa": "RV64I",
+      "mandatory_extensions": [
+        "I"
+      ],
+      "optional_extensions": [
+        "M",
+        "A",
+        "F",
+        "D",
+        "C",
+        "Zicsr",
+        "Zifencei"
+      ],
+      "status": "ratified",
+      "typical_use": "General purpose computing"
+    },
+    "RV32E": {
+      "description": "Base 32-bit integer instruction set for embedded systems",
+      "base_isa": "RV32E",
+      "mandatory_extensions": [
+        "E"
+      ],
+      "optional_extensions": [
+        "M",
+        "A",
+        "C",
+        "Zicsr",
+        "Zifencei"
+      ],
+      "status": "ratified",
+      "typical_use": "Embedded systems"
+    },
+    "RV128I": {
+      "description": "Base 128-bit integer instruction set",
+      "base_isa": "RV128I",
+      "mandatory_extensions": [
+        "I"
+      ],
+      "optional_extensions": [
+        "M",
+        "A",
+        "F",
+        "D",
+        "C",
+        "Zicsr",
+        "Zifencei"
+      ],
+      "status": "ratified",
+      "typical_use": "High-performance computing"
+    },
+    "RV32GC": {
+      "description": "General purpose 32-bit computing profile",
+      "base_isa": "RV32I",
+      "mandatory_extensions": [
+        "I",
+        "M",
+        "A",
+        "F",
+        "D",
+        "C",
+        "Zicsr",
+        "Zifencei"
+      ],
+      "optional_extensions": [
+        "Zba",
+        "Zbb",
+        "Zbc",
+        "Zbs",
+        "Zbkb",
+        "Zbkc",
+        "Zbkx",
+        "Zknd",
+        "Zkne",
+        "Zknh",
+        "Zksed",
+        "Zksh"
+      ],
+      "status": "ratified",
+      "typical_use": "General purpose computing with full feature set"
+    },
+    "RV64GC": {
+      "description": "General purpose 64-bit computing profile",
+      "base_isa": "RV64I",
+      "mandatory_extensions": [
+        "I",
+        "M",
+        "A",
+        "F",
+        "D",
+        "C",
+        "Zicsr",
+        "Zifencei"
+      ],
+      "optional_extensions": [
+        "Zba",
+        "Zbb",
+        "Zbc",
+        "Zbs",
+        "Zbkb",
+        "Zbkc",
+        "Zbkx",
+        "Zknd",
+        "Zkne",
+        "Zknh",
+        "Zksed",
+        "Zksh"
+      ],
+      "status": "ratified",
+      "typical_use": "General purpose computing with full feature set"
+    },
+    "RV32IMC": {
+      "description": "Embedded 32-bit computing profile",
+      "base_isa": "RV32I",
+      "mandatory_extensions": [
+        "I",
+        "M",
+        "C"
+      ],
+      "optional_extensions": [
+        "A",
+        "Zicsr",
+        "Zifencei"
+      ],
+      "status": "ratified",
+      "typical_use": "Embedded systems with basic computing needs"
+    },
+    "RV64IMC": {
+      "description": "Embedded 64-bit computing profile",
+      "base_isa": "RV64I",
+      "mandatory_extensions": [
+        "I",
+        "M",
+        "C"
+      ],
+      "optional_extensions": [
+        "A",
+        "Zicsr",
+        "Zifencei"
+      ],
+      "status": "ratified",
+      "typical_use": "Embedded systems with basic computing needs"
+    }
+  },
+  "extensions": {
+    "I": {
+      "name": "Base Integer Instruction Set",
+      "description": "Base integer instructions, including integer computational, control transfer, and memory access instructions",
+      "status": "ratified",
+      "category": "base"
+    },
+    "E": {
+      "name": "Embedded Base Integer Instruction Set",
+      "description": "Reduced version of I for embedded systems with only 16 registers",
+      "status": "ratified",
+      "category": "base"
+    },
+    "M": {
+      "name": "Integer Multiplication and Division",
+      "description": "Standard extension for integer multiplication and division operations",
+      "status": "ratified",
+      "category": "arithmetic"
+    },
+    "A": {
+      "name": "Atomic Operations",
+      "description": "Standard extension for atomic memory operations",
+      "status": "ratified",
+      "category": "memory"
+    },
+    "F": {
+      "name": "Single-Precision Floating-Point",
+      "description": "Standard extension for single-precision floating-point operations",
+      "status": "ratified",
+      "category": "floating-point"
+    },
+    "D": {
+      "name": "Double-Precision Floating-Point",
+      "description": "Standard extension for double-precision floating-point operations",
+      "status": "ratified",
+      "category": "floating-point"
+    },
+    "C": {
+      "name": "Compressed Instructions",
+      "description": "Standard extension for 16-bit compressed instructions",
+      "status": "ratified",
+      "category": "compression"
+    },
+    "Zicsr": {
+      "name": "Control and Status Register Instructions",
+      "description": "Standard extension for control and status register operations",
+      "status": "ratified",
+      "category": "system"
+    },
+    "Zifencei": {
+      "name": "Instruction-Fetch Fence",
+      "description": "Standard extension for instruction-fetch fence operations",
+      "status": "ratified",
+      "category": "system"
+    },
+    "Zba": {
+      "name": "Address Generation Instructions",
+      "description": "Standard extension for address generation instructions",
+      "status": "ratified",
+      "category": "bitmanip"
+    },
+    "Zbb": {
+      "name": "Basic Bit-Manipulation",
+      "description": "Standard extension for basic bit manipulation operations",
+      "status": "ratified",
+      "category": "bitmanip"
+    },
+    "Zbc": {
+      "name": "Carry-Less Multiplication",
+      "description": "Standard extension for carry-less multiplication operations",
+      "status": "ratified",
+      "category": "bitmanip"
+    },
+    "Zbs": {
+      "name": "Single-Bit Instructions",
+      "description": "Standard extension for single-bit operations",
+      "status": "ratified",
+      "category": "bitmanip"
+    }
+  }
+}

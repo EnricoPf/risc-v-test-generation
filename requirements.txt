@@ -1,0 +1,10 @@
+# No external dependencies are needed for the core functionality 
+
+# Dependencies for RISC-V profile fetcher
+requests>=2.31.0
+PyGithub>=2.1.1
+PyYAML>=6.0.1
+markdown>=3.5.1
+
+# Dependencies for opcode fetcher
+requests>=2.31.0  # Already included above 

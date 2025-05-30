@@ -1,0 +1,6 @@
+profiles/riscv-spec-riscv-isa-release-01e31a0-2025-05-28.pdf
+src/classifier/__pycache__/*
+src/database/__pycache__/*
+src/parser/__pycache__/*
+src/utils/__pycache__/*
+src/database/data/opcodes/*

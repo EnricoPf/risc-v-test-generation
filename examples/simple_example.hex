@@ -1,0 +1,15 @@
+# Simple RISC-V example with base ISA and M-extension instructions
+# This file contains hexadecimal representations of RISC-V instructions
+
+# Base RV32I instructions
+00500513  # addi a0, zero, 5 - Load immediate 5 into a0
+00500593  # addi a1, zero, 5 - Load immediate 5 into a1
+
+# M-extension instructions
+02b50633  # mul a2, a0, a1 - Multiply a0 and a1, store in a2
+02b54633  # div a2, a0, a1 - Divide a0 by a1, store in a2
+
+# Control flow
+00c12083  # lw ra, 12(sp) - Load word from stack
+00810113  # addi sp, sp, 8 - Adjust stack pointer
+00008067  # jalr zero, 0(ra) - Return from function 
