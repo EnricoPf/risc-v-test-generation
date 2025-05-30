@@ -26,9 +26,8 @@ class ProfileClassifier:
         if "error" in instruction:
             return {"error": instruction["error"]}
         
-        # Get the extension for this instruction
-        extension = self.parser.get_instruction_extension(instruction["instruction"])
-        instruction["extension"] = extension
+        # Use the extension already set by the parser
+        extension = instruction["extension"]
         
         # Find compatible profiles
         compatible_profiles = self.profiles_db.get_compatible_profiles([extension])
@@ -65,16 +64,15 @@ class ProfileClassifier:
                     instructions.append(instruction)
                     continue
                 
-                # Get the extension
-                extension = self.parser.get_instruction_extension(instruction["instruction"])
-                instruction["extension"] = extension
+                # Use the extension already set by the parser
+                extension = instruction["extension"]
                 
                 # Store instruction info
                 instruction["offset"] = i
                 instructions.append(instruction)
                 
                 # Track used extensions
-                if extension != "Unknown Extension":
+                if extension != "Unknown Extension" and extension != "Unknown":
                     extensions_used.add(extension)
         
         # Find compatible profiles for all instructions
@@ -121,16 +119,15 @@ class ProfileClassifier:
                     instructions.append(instruction)
                     continue
                 
-                # Get the extension
-                extension = self.parser.get_instruction_extension(instruction["instruction"])
-                instruction["extension"] = extension
+                # Use the extension already set by the parser
+                extension = instruction["extension"]
                 
                 # Store instruction info
                 instruction["line"] = line_num + 1
                 instructions.append(instruction)
                 
                 # Track used extensions
-                if extension != "Unknown Extension":
+                if extension != "Unknown Extension" and extension != "Unknown":
                     extensions_used.add(extension)
             except Exception as e:
                 instructions.append({
@@ -190,4 +187,13 @@ class ProfileClassifier:
             },
             "mandatory_extensions": mandatory_extensions,
             "optional_extensions": optional_extensions
-        } 
+        }
+
+    def get_instruction_extension(self, instruction_name):
+        """Get the extension for a given instruction name"""
+        # Search through all extensions
+        for ext, opcodes in self.opcodes_db.items():
+            for instr in opcodes:
+                if instr.get('instruction') == instruction_name:
+                    return ext
+        return None 

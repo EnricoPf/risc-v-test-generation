@@ -50,10 +50,23 @@ class RiscVInstructionParser:
             self.opcodes_db = {}
     
     def _determine_instruction_type(self, instr_data):
-        """Determine instruction type based on fields"""
+        """Determine instruction type based on fields or fallback mapping"""
         fields = instr_data.get('fields', {})
-        
-        # Check for common field patterns
+        name = instr_data.get('instruction', '').lower()
+        # Fallback mapping for common instructions
+        fallback_types = {
+            'addi': 'I-Type', 'slti': 'I-Type', 'sltiu': 'I-Type', 'xori': 'I-Type', 'ori': 'I-Type', 'andi': 'I-Type',
+            'jalr': 'I-Type', 'lb': 'I-Type', 'lh': 'I-Type', 'lw': 'I-Type', 'lbu': 'I-Type', 'lhu': 'I-Type',
+            'slli': 'I-Type', 'srli': 'I-Type', 'srai': 'I-Type',
+            'add': 'R-Type', 'sub': 'R-Type', 'sll': 'R-Type', 'slt': 'R-Type', 'sltu': 'R-Type', 'xor': 'R-Type',
+            'srl': 'R-Type', 'sra': 'R-Type', 'or': 'R-Type', 'and': 'R-Type',
+            'sw': 'S-Type', 'sh': 'S-Type', 'sb': 'S-Type',
+            'beq': 'B-Type', 'bne': 'B-Type', 'blt': 'B-Type', 'bge': 'B-Type', 'bltu': 'B-Type', 'bgeu': 'B-Type',
+            'lui': 'U-Type', 'auipc': 'U-Type', 'jal': 'J-Type',
+        }
+        if not fields and name in fallback_types:
+            return fallback_types[name]
+        # Original logic
         if '31..25' in fields and '14..12' in fields:
             return 'R-Type'
         elif '31..20' in fields and '14..12' in fields:
@@ -133,10 +146,15 @@ class RiscVInstructionParser:
                 "extension": "Unknown"
             }
         
+        # Set the type field using the improved _determine_instruction_type method
+        instr_type = instruction_info.get('type')
+        if not instr_type or instr_type == 'Unknown':
+            instr_type = self._determine_instruction_type(instruction_info)
+        
         # Build instruction details
         result = {
             "instruction": instruction_info.get('instruction', 'Unknown'),
-            "type": instruction_info.get('type', 'Unknown'),
+            "type": instr_type,
             "opcode": opcode,
             "funct3": funct3,
             "funct7": funct7,
@@ -147,7 +165,7 @@ class RiscVInstructionParser:
             "binary": f"{instruction_int:032b}",
             "extension": extension
         }
-            
+        
         return result
 
     def get_instruction_extension(self, instruction_name):
