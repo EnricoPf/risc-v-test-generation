@@ -89,23 +89,20 @@ risc-v-rework/
 └── examples/                    # 📝 Exemplos de uso e arquivos de amostra
 ```
 
-## 🛠️ O Que Este Framework Faz
+##  O Que Este Framework Faz
 
 ### Geração de Código (`generate_riscv_code.py`)
-- ✅ **Parâmetros Aleatórios Inteligentes**: Gera números de registradores válidos (x0-x31) e valores imediatos corretos
-- ✅ **Suporte a Todos os Formatos**: Funciona com todos os formatos de instrução RISC-V (R, I, S, B, U, J)
-- ✅ **Respeitando Restrições**: Ranges de valores imediatos e requisitos de alinhamento específicos por formato
-- ✅ **Saída Flexível**: Console, arquivo, ou pasta organizada automaticamente
-- ✅ **Descoberta de Instruções**: Lista instruções disponíveis por formato
+-  Gera números de registradores válidos (x0-x31) e valores imediatos corretos
+-  Funciona com todos os formatos de instrução RISC-V (R, I, S, B, U, J)
+-  Ranges de valores imediatos e requisitos de alinhamento específicos por formato
+-  Lista instruções disponíveis para cada formato
 
 ### Validação de Código (`validate_riscv_code.py`)
-- ✅ **Validação de Sintaxe**: Análise adequada do formato das instruções
-- ✅ **Verificação de Parâmetros**: Ranges de registradores, ranges de valores imediatos, contagem de parâmetros
-- ✅ **Conformidade de Formato**: Validação de restrições específicas do formato da instrução
-- ✅ **Detecção de Erros**: Instruções desconhecidas, valores fora do range, tipos incorretos
-- ✅ **Relatórios Detalhados**: Análise linha por linha com saída verbosa
+- Análisa ranges de registradores, ranges de valores imediatos, numero de parâmetros
+- Validação de restrições específicas do formato da instrução
+- Instruções desconhecidas, valores fora do range, tipos incorretos são consideradas error
 
-### Formatos de Instrução Suportados
+### Formatos de Instrução Válidos
 
 Aqui estão os tipos de instrução que o framework entende:
 
@@ -118,9 +115,7 @@ Aqui estão os tipos de instrução que o framework entende:
 | U-Type | Imediato superior | rd, imm | `lui x1, 0x10000` |
 | J-Type | Operações de jump | rd, imm | `jal x1, 0x1000` |
 
-## 🔧 Como Instalar
-
-É bem tranquilo de configurar:
+## Como Instalar
 
 1. **Clone o repositório**:
    ```bash
@@ -133,14 +128,13 @@ Aqui estão os tipos de instrução que o framework entende:
    pip install -r requirements.txt
    ```
 
-3. **Inicialize os dados de opcode** (se necessário):
+3. **Inicialize os dados de opcode e profiles**:
    ```bash
    python src/riscv_tools/fetch_opcodes.py
+   python src/fetch_riscv_profiles.py
    ```
 
-## 📊 Fluxos de Trabalho Úteis
-
-### 1. Gerar Suíte de Testes Completa
+### Pra gerar testes
 ```bash
 # Gerar casos de teste abrangentes para diferentes formatos
 python tools/generate_riscv_code.py --format R --count 50 --save-to-output
@@ -148,7 +142,7 @@ python tools/generate_riscv_code.py --format I --count 50 --save-to-output
 python tools/generate_riscv_code.py --format B --count 25 --save-to-output
 ```
 
-### 2. Validar Código Gerado
+### Pra validar código gerado
 ```bash
 # Validar todos os arquivos gerados
 for file in output/*.s; do
@@ -157,7 +151,7 @@ for file in output/*.s; do
 done
 ```
 
-### 3. Pipeline de Desenvolvimento
+### Fluxo geral de criação de testes
 ```bash
 # Gerar casos de teste
 python tools/generate_riscv_code.py add sub mul div --count 10 --output teste_aritmetica.s
@@ -167,17 +161,17 @@ python tools/validate_riscv_code.py teste_aritmetica.s --verbose
 
 # Usar no seu pipeline de testes
 if python tools/validate_riscv_code.py teste_aritmetica.s --quiet; then
-    echo "✅ Casos de teste válidos gerados"
+    echo "Casos de teste válidos gerados"
     # Continuar com os testes...
 else
-    echo "❌ Código inválido gerado"
+    echo "Código inválido gerado"
     exit 1
 fi
 ```
 
-## 🧪 Testando
+## Demo
 
-Para ver tudo funcionando, rode a demonstração:
+Para ver tudo funcionando, rode:
 ```bash
 python tools/demo.py
 ```
@@ -187,35 +181,3 @@ Para executar testes específicos:
 python tests/debug_validator.py
 python tests/test_validate.py
 ```
-
-## 📚 Documentação
-
-- **[Documentação das Ferramentas](docs/tools_README.md)**: Documentação detalhada para ferramentas de geração e validação de código
-- **[Exemplos](examples/)**: Exemplos de uso e arquivos de amostra
-- **[Referência da API](src/riscv_tools/)**: Documentação da biblioteca principal
-
-## 🤝 Como Contribuir
-
-Se você quiser ajudar a melhorar o projeto:
-
-1. Adicione novas funcionalidades no diretório apropriado (`tools/` para scripts, `src/riscv_tools/` para bibliotecas)
-2. Adicione testes no diretório `tests/`
-3. Atualize a documentação no diretório `docs/`
-4. Siga a estrutura organizada para manter tudo arrumado
-
-## 📈 Planos Futuros
-
-Ideias para deixar o framework ainda melhor:
-
-- [ ] Suporte para extensões vetoriais RISC-V
-- [ ] Integração com simuladores RISC-V
-- [ ] Ferramentas de benchmark de performance
-- [ ] Interface web para geração de código
-- [ ] Suporte a conjuntos de instruções customizados
-
----
-
-**Como Era Antes**: Todos os arquivos estavam em `src/database/`, dificultando encontrar as ferramentas principais  
-**Como Está Agora**: Separação clara de ferramentas, bibliotecas, dados, testes e documentação
-
-**💡 Dica**: Comece testando com `python tools/demo.py` para ver tudo funcionando! 
