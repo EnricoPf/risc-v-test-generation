@@ -10,7 +10,7 @@ class RiscVProfiles:
     
     def _load_profiles(self):
         """Load profiles and extensions from riscv-profiles.json"""
-        profiles_file = Path(__file__).parent.parent.parent / "profiles" / "riscv-profiles.json"
+        profiles_file = Path(__file__).parent / "data" / "profiles" / "riscv-profiles.json"
         
         try:
             with open(profiles_file, 'r') as f:
