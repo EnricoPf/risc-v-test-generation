@@ -2,94 +2,46 @@
 
 Um framework completo para analisar conjuntos de instruções RISC-V e gerar casos de teste randomizados com parâmetros válidos.
 
-## 🚀 Começando Rapidamente
+# Ferramentas Principais
 
-### Ferramentas Principais
-
-As principais ferramentas estão na pasta `tools/`. É bem simples de usar:
+As principais ferramentas estão na pasta `tools/`.
 
 ```bash
-# Gerar código assembly RISC-V com parâmetros aleatórios válidos
+# Pra gerar código assembly RISC-V com parâmetros aleatórios válidos
 python tools/generate_riscv_code.py add sub sll --count 5
 
-# Validar a correção do código assembly RISC-V
+# Pra checar se o código assembly RISC-V está correto
 python tools/validate_riscv_code.py arquivo_assembly.s
 
-# Ver demonstração completa do workflow
+# Pra demonstrar o workflow inteiro
 python tools/demo.py
 ```
 
-### Exemplos de Geração de Código
+### Exemplo de Geração de Código
 
 ```bash
-# Gerar instruções específicas
+# Pra gerar 3 testes pra add sub e addi
 python tools/generate_riscv_code.py add sub addi --count 3
 
-# Gerar todas as instruções do tipo R
+# Pra gerar 10 testes com todas as instruções do tipo R
 python tools/generate_riscv_code.py --format R --count 10
 
-# Salvar na pasta output com nome de arquivo gerado automaticamente
+# Pra salvar na pasta output, use --save-to-output
 python tools/generate_riscv_code.py add sub --count 5 --save-to-output
 
-# Gerar e salvar em arquivo específico
-python tools/generate_riscv_code.py --format I --count 20 --output teste_tipo_i.s
+# Pode especificar o nome do arquivo onde quer salvar com --output
+python tools/generate_riscv_code.py add --output teste_tipo_i.s
 ```
 
-### Exemplos de Validação de Código
+### Exemplo de Validação de Código
 
 ```bash
 # Validação básica
 python tools/validate_riscv_code.py codigo_gerado.s
 
-# Validação detalhada com análise linha por linha
+# Validação linha por linha
 python tools/validate_riscv_code.py codigo_gerado.s --verbose
-
-# Validar a partir da entrada padrão
-cat codigo_assembly.s | python tools/validate_riscv_code.py --stdin
 ```
-
-## 📁 Estrutura do Projeto
-
-Organizamos tudo de forma bem clara para você não se perder:
-
-```
-risc-v-rework/
-├── README.md                    # Este arquivo - visão geral do projeto
-├── requirements.txt             # Dependências do Python
-│
-├── tools/                       # 🔧 Scripts principais que você vai usar
-│   ├── generate_riscv_code.py   # Gera assembly RISC-V com parâmetros aleatórios
-│   ├── validate_riscv_code.py   # Valida se o código assembly está correto
-│   └── demo.py                  # Demonstração completa do workflow
-│
-├── src/                         # 📚 Módulos de biblioteca principal
-│   ├── riscv_tools/            # Biblioteca de ferramentas RISC-V
-│   │   ├── __init__.py
-│   │   ├── test_generator.py    # Geração de casos de teste aleatórios
-│   │   ├── fetch_opcodes.py     # Busca e processamento de opcodes
-│   │   └── profiles.py          # Perfis de instruções RISC-V
-│   ├── parser/                  # Análise de instruções (já existia)
-│   ├── classifier/              # Classificação de instruções (já existia)
-│   └── main.py                  # Aplicação principal (já existia)
-│
-├── data/                        # 📊 Arquivos de dados
-│   └── opcodes/                 # Definições de opcodes RISC-V (JSON)
-│
-├── tests/                       # 🧪 Arquivos de teste e ferramentas de debug
-│   ├── debug_validator.py       # Script de debug do validador
-│   ├── test_validate.py         # Testes de validação
-│   └── *.s                      # Arquivos de teste assembly
-│
-├── output/                      # 📁 Arquivos gerados automaticamente
-│   └── (criado automaticamente quando usar --save-to-output)
-│
-├── docs/                        # 📖 Documentação
-│   └── tools_README.md          # Documentação detalhada das ferramentas
-│
-└── examples/                    # 📝 Exemplos de uso e arquivos de amostra
-```
-
-##  O Que Este Framework Faz
 
 ### Geração de Código (`generate_riscv_code.py`)
 -  Gera números de registradores válidos (x0-x31) e valores imediatos corretos
@@ -104,7 +56,7 @@ risc-v-rework/
 
 ### Formatos de Instrução Válidos
 
-Aqui estão os tipos de instrução que o framework entende:
+Aqui estão os tipos de instrução que o framework tem support:
 
 | Formato | Descrição | Parâmetros | Exemplo |
 |---------|-----------|------------|---------|
@@ -115,7 +67,7 @@ Aqui estão os tipos de instrução que o framework entende:
 | U-Type | Imediato superior | rd, imm | `lui x1, 0x10000` |
 | J-Type | Operações de jump | rd, imm | `jal x1, 0x1000` |
 
-## Como Instalar
+## Para Instalar
 
 1. **Clone o repositório**:
    ```bash
