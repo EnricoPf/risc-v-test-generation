@@ -1,0 +1,166 @@
+🚀 RISC-V Code Generation and Validation Demo
+============================================================
+This demo shows the complete workflow of:
+  1. Generating random RISC-V assembly code
+  2. Validating the generated code for correctness
+  3. Detecting invalid instructions and parameters
+
+🔧 DEMO 1: Basic Code Generation
+==================================================
+Command: python3 generate_riscv_code.py add sub sll addi lui --count 2
+Generated code:
+# Generated RISC-V Assembly Code
+# Instructions: add, sub, sll, addi, lui
+
+# add instructions
+add x21, x7, x15
+    # Parameters: rd=21, rs1=7, rs2=15
+add x21, x11, x0
+    # Parameters: rd=21, rs1=11, rs2=0
+
+# sub instructions
+sub x3, x3, x16
+    # Parameters: rd=3, rs1=3, rs2=16
+sub x19, x21, x1
+    # Parameters: rd=19, rs1=21, rs2=1
+
+# sll instructions
+sll x29, x6, x27
+    # Parameters: rd=29, rs1=6, rs2=27
+sll x15, x5, x19
+    # Parameters: rd=15, rs1=5, rs2=19
+
+# addi instructions
+addi x4, x27, 503
+    # Parameters: rd=4, rs1=27, imm=503
+addi x22, x13, 819
+    # Parameters: rd=22, rs1=13, imm=819
+
+# lui instructions
+lui x18, 1361
+    # Parameters: rd=18, imm=1361
+lui x28, 797
+    # Parameters: rd=28, imm=797
+
+
+
+🔧 DEMO 2: Format-Specific Generation
+==================================================
+Command: python3 generate_riscv_code.py --format I --count 5
+Generated I-Type instructions:
+# Generated I-Type RISC-V Instructions
+# Selected instructions: vnclip.wi, aes32dsmi, vmsleu.vi, vadd.vi, vslideup.vi
+
+vnclip.wi x3, x9, 1565
+    # vnclip.wi - rd=3, rs1=9, imm=1565
+aes32dsmi x15, x13, -1664
+    # aes32dsmi - rd=15, rs1=13, imm=-1664
+vmsleu.vi x6, x25, -1375
+    # vmsleu.vi - rd=6, rs1=25, imm=-1375
+vadd.vi x19, x24, -851
+    # vadd.vi - rd=19, rs1=24, imm=-851
+vslideup.vi x17, x24, 1963
+    # vslideup.vi - rd=17, rs1=24, imm=1963
+
+
+🔧 DEMO 3: Code Validation
+==================================================
+Command: python3 validate_riscv_code.py /tmp/tmprutu0car.s --verbose
+Validation result:
+
+=== RISC-V Code Validation Report ===
+Source: /tmp/tmprutu0car.s
+Total lines: 33
+Instruction lines: 10
+Valid instructions: 10
+Overall result: ✓ VALID
+
+📋 Line-by-line Results:
+    5: ✓ add
+    7: ✓ add
+   11: ✓ sub
+   13: ✓ sub
+   17: ✓ sll
+   19: ✓ sll
+   23: ✓ addi
+   25: ✓ addi
+   29: ✓ lui
+   31: ✓ lui
+
+
+✅ Code validation: PASSED
+
+🔧 DEMO 4: Invalid Code Detection
+==================================================
+Invalid test code:
+# Test invalid instructions
+add x1, x2, x3      # Valid
+add x50, x1, x2     # Invalid register (x50 > x31)
+addi x1, x2, 5000   # Invalid immediate (out of range)
+invalid_instr x1    # Invalid instruction name
+
+Validation result:
+
+=== RISC-V Code Validation Report ===
+Source: /tmp/tmpu62dx6rd.s
+Total lines: 5
+Instruction lines: 4
+Valid instructions: 1
+Overall result: ✗ INVALID
+
+🔴 Errors (3):
+  Line 3: Register rd (x50) out of range [0-31]
+  Line 4: I-Type immediate imm (5000) out of range [-2048, 2047]
+  Line 5: Unknown instruction 'invalid_instr'
+
+📋 Line-by-line Results:
+    2: ✓ add
+    3: ✗ add
+       🔴 Line 3: Register rd (x50) out of range [0-31]
+    4: ✗ addi
+       🔴 Line 4: I-Type immediate imm (5000) out of range [-2048, 2047]
+    5: ✗ invalid_instr
+       🔴 Line 5: Unknown instruction 'invalid_instr'
+
+
+✅ Error detection: WORKING (correctly detected invalid code)
+
+🔧 DEMO 5: Available Instructions
+==================================================
+Command: python3 generate_riscv_code.py --list-by-format
+Available instruction formats:
+Instructions by format:
+
+B-Type (6 instructions):
+  beq
+  bge
+  bgeu
+  blt
+  bltu
+  bne
+
+I-Type (78 instructions):
+  addi
+  aes32dsi
+  aes32dsmi
+  aes32esi
+  aes32esmi
+  aes64ks1i
+  andi
+  bclri
+  bexti
+... (truncated for demo)
+
+🎉 Demo Complete!
+============================================================
+Summary of capabilities demonstrated:
+  ✅ Random instruction generation with valid parameters
+  ✅ Format-specific instruction generation
+  ✅ Assembly code validation
+  ✅ Error detection for invalid code
+  ✅ Instruction format classification
+
+Next steps:
+  • Use generate_riscv_code.py to create test cases
+  • Use validate_riscv_code.py to verify correctness
+  • Integrate into your testing pipeline

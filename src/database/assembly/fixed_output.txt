@@ -1,0 +1,23 @@
+INFO: Loaded opcodes for 105 extensions
+
+=== RISC-V Code Validation Report ===
+Source: manual_invalid_test.s
+Total lines: 5
+Instruction lines: 4
+Valid instructions: 1
+Overall result: ✗ INVALID
+
+🔴 Errors (3):
+  Line 3: Register rd (x50) out of range [0-31]
+  Line 4: I-Type immediate imm (5000) out of range [-2048, 2047]
+  Line 5: Unknown instruction 'invalid_instr'
+
+📋 Line-by-line Results:
+    2: ✓ add
+    3: ✗ add
+       🔴 Line 3: Register rd (x50) out of range [0-31]
+    4: ✗ addi
+       🔴 Line 4: I-Type immediate imm (5000) out of range [-2048, 2047]
+    5: ✗ invalid_instr
+       🔴 Line 5: Unknown instruction 'invalid_instr'
+
