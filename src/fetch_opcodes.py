@@ -25,11 +25,11 @@ class RiscVOpcodesFetcher:
         
         Args:
             output_dir: Directory to save the fetched opcode definitions.
-                       If None, saves to src/database/data/opcodes/
+                       If None, saves to src/data/opcodes/
         """
         if output_dir is None:
             # Navigate to project root and then to data directory
-            project_root = Path(__file__).parent.parent.parent
+            project_root = Path(__file__).parent
             self.output_dir = project_root / "data" / "opcodes"
         else:
             self.output_dir = Path(output_dir)
