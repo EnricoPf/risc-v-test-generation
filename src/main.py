@@ -183,8 +183,14 @@ def main():
                 # Print profiles
                 print("Available RISC-V Profiles:")
                 for profile_name, profile in profiles.items():
-                    print(f"  - {profile_name}: {profile['name']}")
-                    print(f"    {profile['description']}")
+                    display_name = (
+                        profile.get('name')
+                        or profile.get('description')
+                        or profile_name
+                    )
+                    description = profile.get('description', '')
+                    print(f"  - {profile_name}: {display_name}")
+                    print(f"    {description}")
     
     else:
         parser.print_help()
