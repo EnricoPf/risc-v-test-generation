@@ -6,15 +6,21 @@ class RiscVProfiles:
     def __init__(self):
         self.profiles = {}
         self.extensions = {}
+        self.metadata = {}
+        self.raw_data = None
+        self.profiles_file_path = None
         self._load_profiles()
     
     def _load_profiles(self):
         """Load profiles and extensions from riscv-profiles.json"""
         profiles_file = Path(__file__).parent / "data" / "profiles" / "riscv-profiles.json"
+        self.profiles_file_path = str(profiles_file)
         
         try:
             with open(profiles_file, 'r') as f:
                 data = json.load(f)
+                self.raw_data = data
+                self.metadata = data.get('metadata', {})
                 self.profiles = data.get('profiles', {})
                 self.extensions = data.get('extensions', {})
         except Exception as e:
@@ -61,6 +67,21 @@ class RiscVProfiles:
                 compatible_profiles.append(profile_name)
         
         return compatible_profiles
+
+    def get_raw_dataset(self):
+        """Return the entire dataset exactly as in riscv-profiles.json (including metadata)."""
+        if self.raw_data is not None:
+            return self.raw_data
+        # Fallback if raw_data was not loaded for some reason
+        return {
+            "metadata": self.metadata,
+            "profiles": self.profiles,
+            "extensions": self.extensions,
+        }
+
+    def get_profiles_file_path(self):
+        """Return the path to the riscv-profiles.json file used for loading."""
+        return self.profiles_file_path
     
     def save_extensions(self, filepath=None):
         """Save extensions to a JSON file"""

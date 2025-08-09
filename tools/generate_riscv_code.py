@@ -25,7 +25,7 @@ import datetime
 
 # Add the src directory to the path to import riscv_tools
 sys.path.append(str(Path(__file__).parent.parent / "src"))
-from riscv_tools import RiscVTestGenerator
+from test_generator import RiscVTestGenerator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')

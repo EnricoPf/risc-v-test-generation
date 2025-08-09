@@ -177,8 +177,8 @@ def main():
             profiles = profiles_db.get_profiles()
             
             if args.json:
-                # Output as JSON
-                print(json.dumps(profiles, indent=2))
+                # Output the entire raw dataset to exactly mirror riscv-profiles.json
+                print(json.dumps(classifier.profiles_db.get_raw_dataset(), indent=2))
             else:
                 # Print profiles
                 print("Available RISC-V Profiles:")
