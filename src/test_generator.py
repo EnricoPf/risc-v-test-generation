@@ -15,7 +15,7 @@ class RiscVTestGenerator:
         
         Args:
             opcodes_dir: Directory containing opcode JSON files.
-                        If None, uses src/database/data/opcodes/
+                        If None, uses src/data/opcodes/
         """
         if opcodes_dir is None:
             self.opcodes_dir = Path(__file__).parent / "data" / "opcodes"

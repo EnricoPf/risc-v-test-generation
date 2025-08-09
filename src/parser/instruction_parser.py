@@ -12,7 +12,7 @@ class RiscVInstructionParser:
     
     def _load_opcodes(self):
         """Load all opcode files from the opcodes directory"""
-        opcodes_dir = Path(__file__).parent.parent / "database" / "data" / "opcodes"
+        opcodes_dir = Path(__file__).parent.parent / "data" / "opcodes"
         
         # Load all_opcodes.json
         try:
