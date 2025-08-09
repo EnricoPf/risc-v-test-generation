@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from parser.instruction_parser import RiscVInstructionParser
-from database.risc_v_profiles import RiscVProfiles
+from risc_v_profiles import RiscVProfiles
 
 class ProfileClassifier:
     def __init__(self):
