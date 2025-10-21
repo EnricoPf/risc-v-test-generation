@@ -1,0 +1,106 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{setspace}
+\usepackage{hyperref}
+
+% Espaçamento simples conforme orientações
+\setstretch{1.0}
+
+\begin{document}
+
+\section*{Identificação}
+\textbf{Projeto}: Desenvolvimento de Testes de Qualidade para Verificação de Processadores RISC-V\\
+\textbf{Bolsista / RA}: Enrico Fernandes / RA: \textit{[preencher]}\\
+\textbf{Orientador}: Prof. Dr. Rodolfo Azevedo\\
+\textbf{Local de execução}: Instituto de Computação (IC) – UNICAMP\\
+\textbf{Vigência}: \textit{Março–Agosto/2025 (confirmar datas exatas)}
+
+\section{Introdução}
+Ao longo dos últimos anos, a arquitetura RISC-V consolidou-se como um ecossistema aberto e em rápida evolução, reunindo implementações que vão de microcontroladores embarcados de baixíssimo consumo a núcleos de alto desempenho para aplicações em nuvem. Essa pluralidade é uma virtude do projeto aberto, mas traz consigo um obstáculo imediato para quem pretende assegurar conformidade com a especificação: garantir que implementações com conjuntos de extensões distintos, em estados de maturidade diversos, executem corretamente programas que exercitam instruções e combinações de operandos variados. Estudos recentes apontam para a existência de centenas de implementações distintas \cite{waterman2019,cui2023}, o que amplia o espaço de verificação e torna insuficiente a abordagem baseada apenas em suítes estáticas e finitas de testes.
+\newline
+\noindent A dificuldade não se limita ao volume de instruções. Como cada implementação pode habilitar subconjuntos diferentes de extensões, o simples fato de um programa compilar não garante sua portabilidade entre perfis de processadores. Um caso de teste representativo precisa, ao mesmo tempo, respeitar as restrições sintáticas e semânticas da ISA, cobrir padrões relevantes de uso e, quando possível, evidenciar quais perfis seriam capazes de executá-lo. Nesse contexto, este trabalho apresenta o desenvolvimento de um conjunto de ferramentas integradas para geração e validação de casos de teste de RISC-V. O objetivo é combinar a capacidade de gerar código com diversidade suficiente para revelar inconformidades com a capacidade de analisar esse código sob a ótica de perfis e extensões, fornecendo subsídios para diagnóstico e comparação entre implementações.
+
+\section{Materiais e Métodos}
+O desenvolvimento seguiu uma organização modular e incremental, com validações contínuas a cada novo componente incorporado. A primeira etapa consistiu em retomar a especificação RISC-V \cite{riscv-priv} e a documentação sobre perfis \cite{riscv-profiles}, complementadas por leituras sobre verificação de processadores \cite{herdt2020,armstrong2019}. A partir dessa base, defini o escopo mínimo que permitiria abordar o problema em sua essência: precisava gerar código que cobrisse formatos distintos de instruções, precisava validar esse código em níveis diferentes de rigor e, ao final, precisava produzir um diagnóstico que relacionasse o código a perfis plausíveis de execução.
+\newline
+\noindent O módulo de coleta de dados foi implementado para obter, a partir de repositórios oficiais, definições de instruções que pudessem ser normalizadas e indexadas localmente. O resultado é um banco de dados que reúne instruções de extensões variadas e serve de referência para os módulos seguintes. A decisão por materializar esses dados em arquivos JSON versionados no repositório teve um propósito claro: acelerar a iteração local e reduzir a dependência de rede durante a fase de desenvolvimento.
+\newline
+\noindent Com os metadados disponíveis, desenvolvi um gerador de testes que parte de modelos gramaticais por formato (R, I, S, B, U e J). A cada caso gerado, o algoritmo sorteia operandos dentro de faixas compatíveis com a ISA, com atenção especial a restrições usuais como manter o destino diferente de \texttt{x0} e ajustar imediatos ao domínio e ao alinhamento esperados para o formato. Ao final, o gerador instancia os modelos em linhas de assembly, de modo que a saída possa ser compilada por ferramentas padrão quando necessário. Essa abordagem privilegia a variedade com controle: não se trata de geração puramente aleatória, mas de exploração conduzida por regras que evitam casos triviais inválidos e, ao mesmo tempo, produzem combinações informativas.
+\newline
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llll}
+\hline
+\textbf{Tipo de Instrução} & \textbf{Instrução} & \textbf{Restrições} & \textbf{Exemplo Gerado} \\
+\hline
+R-Type (ADD) & ADD rd, rs1, rs2 & rd $\neq$ x0; rs1/rs2 livre & add x5, x12, x7 \\
+I-Type (ADDI) & ADDI rd, rs1, imm & imm: $-2048$ a $2047$ & addi x3, x8, 1500 \\
+B-Type (BEQ) & BEQ rs1, rs2, imm & imm par, múltiplo de 2 & beq x1, x2, 16 \\
+\hline
+\end{tabular}
+\caption{Exemplo de instruções e restrições aplicadas para geração}
+\label{tab:exemplos_geracao}
+\end{table}
+
+\noindent O parser e o classificador formam o elo entre a representação binária/hexadecimal e o entendimento semântico. O parser lê instruções de 32 bits e identifica campos como opcode, \textit{funct3} e \textit{funct7}, inferindo o tipo e relacionando com a extensão mais provável quando possível. O classificador, por sua vez, acumula as extensões utilizadas por um trecho de código e as confronta com as exigidas por cada perfil descrito no banco de dados local. O objetivo não é apenas rotular uma instrução isolada, mas sintetizar uma visão do conjunto, para que seja possível discutir a compatibilidade de um teste inteiro com um perfil específico.
+\newline
+\noindent Por fim, implementei um validador que opera em dois níveis. No primeiro nível, realiza checagens sintáticas e semânticas linha a linha e também consolidadas por arquivo. Nesse ponto, são verificadas condições como faixas de registradores, formatos e contagem de operandos, domínios de imediatos e expectativas de alinhamento em saltos e desvios; ainda são emitidos avisos que, embora não invalidem o programa, sinalizam padrões potencialmente problemáticos, como escrever no registrador \texttt{x0}. No segundo nível, quando o ambiente oferece a ferramenta \texttt{riscv32-unknown-elf-as}, o validador submete o arquivo gerado à compilação, o que acrescenta uma confirmação independente de compatibilidade com a ferramenta oficial. Para permitir execução em diferentes máquinas sem ajustes, o validador busca inicialmente o catálogo em \texttt{src/database/data/opcodes/all_opcodes.json} e, se necessário, utiliza um caminho alternativo em \texttt{src/data/opcodes}.
+\newline
+\noindent A combinação desses módulos foi guiada por um princípio de separação de responsabilidades: coleta para consolidar a referência, geração para explorar o espaço de casos, parsing e classificação para dar significado às sequências e validação para fechar o ciclo com garantias proporcionais aos objetivos do uso pretendido.
+
+\subsection*{Decisões de projeto e justificativas}
+As principais decisões técnicas surgiram da necessidade de equilibrar abrangência e simplicidade de operação. Para mapear os formatos R, I, S, B, U e J, optei por uma estratégia baseada em nomes de instruções e nos campos de codificação mais usuais. Essa escolha reduz o custo computacional e cobre adequadamente as instruções mais frequentes, mesmo quando os metadados não trazem todos os campos explicitados. A organização dos caminhos de dados seguiu o mesmo princípio de pragmatismo: o validador procura primeiro o conjunto versionado em \texttt{src/database/data/opcodes/all_opcodes.json} e, caso não o encontre, utiliza \texttt{src/data/opcodes}. Assim, o código funciona sem ajustes adicionais em diferentes máquinas, preservando reprodutibilidade e facilidade de uso.
+
+No que diz respeito à compatibilidade com perfis, adotei uma definição conservadora: um perfil é considerado compatível quando todas as suas extensões obrigatórias aparecem no conjunto de extensões detectadas no código analisado. Extensões opcionais não são exigidas. Essa interpretação evita declarações otimistas e ajuda a manter coerência com cenários de implantação reais. A etapa de compilação com o montador oficial foi mantida como opcional. Quando \texttt{riscv32-unknown-elf-as} está disponível no ambiente, a compilação funciona como uma confirmação independente das verificações prévias; quando não está, o validador segue útil, realizando checagens sintáticas e semânticas sem obrigar dependências externas.
+
+Durante a implementação da análise de operandos, tratei explicitamente a variação de sintaxe de \texttt{store}, aceitando tanto a forma \texttt{sw rs2, imm(rs1)} quanto a forma \texttt{sw rs2, rs1, imm}. Essa decisão busca acomodar diferenças de uso entre montadores e materiais didáticos. Além disso, inclui verificação de faixas para registradores e imediatos, com destaque para os 12 bits típicos de I e S e para a exigência de alinhamento par em desvios e saltos, e emiti avisos quando o destino é o registrador \texttt{x0}, pois o resultado será descartado. Essas regras ajudam a evidenciar erros sutis e alinham o comportamento da ferramenta às expectativas da ISA.
+
+\section{Resultados}
+O módulo de coleta foi capaz de baixar e processar especificações para um conjunto amplo de extensões RISC-V, cobrindo categorias de instruções de propósito geral, ponto flutuante, atômicas, compressas e outras especializadas. O processamento inclui a padronização de campos e a indexação por extensão, o que viabiliza consultas rápidas e consistentes pelos módulos de geração e de análise. Esse acervo, mantido localmente, mostrou-se suficiente para alimentar as experimentações sem exigir novas consultas durante os testes.
+\newline
+\noindent No gerador, a medição de desempenho indicou complexidade temporal aproximadamente linear com o número de casos solicitados. Ao solicitar, por exemplo, conjuntos com milhares de casos, o tempo de geração cresceu proporcionalmente, sem degradações abruptas, o que confirma a adequação do algoritmo para a produção de suítes em maior escala. Em termos qualitativos, a inspeção manual de amostras geradas evidenciou diversidade de operandos e respeito às restrições de cada formato. Em particular, os casos de I e S refletiram imediatos compatíveis com a codificação de 12 bits, e os desvios em B e saltos em J apresentaram alinhamentos coerentes com a prática.
+\newline
+\noindent O parser e o classificador, aplicados a trechos com instruções misturadas de diferentes extensões, recuperaram de forma consistente os campos de codificação e o tipo de instrução, além de acumularem o conjunto de extensões efetivamente utilizadas. A partir desse conjunto, o classificador produziu listas de perfis compatíveis segundo a definição conservadora adotada. Embora não se tenha realizado um estudo estatístico exaustivo de acurácia, os resultados observados em amostras reais e sintetizadas foram compatíveis com o comportamento esperado, e comparações pontuais com abordagens descritas na literatura \cite{herdt2020,armstrong2019} não revelaram discrepâncias relevantes para o escopo deste projeto.
+\newline
+\noindent O validador foi exercitado tanto no modo puramente estático (sintaxe e semântica) quanto no modo com compilação opcional, quando a ferramenta \texttt{riscv32-unknown-elf-as} estava disponível. No primeiro caso, os relatórios por linha e por arquivo ajudaram a identificar problemas típicos, como operandos fora de faixa e instruções não reconhecidas. No segundo caso, a compilação atuou como confirmação adicional: arquivos que passaram pelas checagens estáticas e compilaram sem erros reforçaram a confiança na consistência das regras aplicadas. O validador foi integrado aos scripts \texttt{test\_validate.py} e \texttt{debug\_validator.py}, o que facilitou a reexecução de cenários e a coleta de resultados em ciclos curtos de iterações.
+
+\section{Discussão / Conclusões}
+Os resultados obtidos sugerem que a combinação entre geração dirigida por regras, análise estrutural de instruções e validação em múltiplos níveis compõe um caminho promissor para apoiar a verificação de implementações RISC-V. A modularidade foi decisiva: a possibilidade de atualizar o acervo de instruções, ajustar os modelos de geração e evoluir as regras do validador de maneira relativamente independente facilita acompanhar a evolução contínua da especificação e das extensões.
+\newline
+\noindent Entre as limitações identificadas, destaco duas frentes. Em primeiro lugar, embora o mapeamento de formatos por heurística seja eficaz para instruções comuns, há espaço para refinar a detecção de tipos em casos limítrofes, sobretudo quando metadados parciais não trazem todos os campos relevantes. Uma evolução natural é incorporar regras mais específicas por instrução, derivadas diretamente das definições completas de codificação quando disponíveis. Em segundo lugar, a avaliação de compatibilidade de perfis adotou, por prudência, a exigência de presença de todas as extensões obrigatórias. Essa decisão evita falsos positivos, mas pode subestimar a compatibilidade de trechos que utilizam subconjuntos de instruções dentro de perfis mais amplos. Investigações futuras podem considerar métricas graduais de compatibilidade ou a integração com simuladores para verificar execução efetiva.
+\newline
+\noindent Ainda assim, mesmo com essas ressalvas, a ferramenta mostrou utilidade prática em cenários de exploração de espaço de testes e de revisão de conjuntos de instruções. Ao ser empregada em conjunto com a ferramenta oficial de montagem, pôde acrescentar uma camada de confiança adicional. Do ponto de vista pedagógico, o projeto também foi valioso, ao exigir o trânsito entre a leitura da especificação, a modelagem de estruturas de dados e a implementação de verificações concretas que refletem restrições da ISA. Em síntese, o trabalho entrega um arcabouço funcional e extensível para apoiar verificação, ao mesmo tempo em que aponta caminhos específicos de aprimoramento.
+
+\section{Matéria encaminhada para publicação (caso houver)}
+\textit{[preencher, se houver submissões no período; caso contrário, indicar ``Não se aplica'']}
+
+\section{Bibliografia}
+\begin{thebibliography}{9}
+\bibitem{waterman2019} WATERMAN, A.; LEE, Y.; PATTERSON, D. A.; ASANOVIĆ, K. The RISC-V Instruction Set Manual, Volume I: User-Level ISA, Document Version 20191213. RISC-V Foundation, 2019.
+\bibitem{cui2023} CUI, E.; LI, T.; WEI, Q. RISC-V instruction set architecture extensions: A survey. IEEE Access, 11:24696–24711, 2023.
+\bibitem{riscv-priv} RISC-V International. The RISC-V Instruction Set Manual Volume II: Privileged Architecture, Document Version 20211203. RISC-V International, 2021.
+\bibitem{riscv-profiles} RISC-V International. RISC-V Profiles Specification, Document Version 20220107. RISC-V International, 2022.
+\bibitem{herdt2020} HERDT, V.; GROSSE, D.; DRECHSLER, R. Enhanced Virtual Prototyping for RISC-V Processor Verification. In: IEEE Computer Society Annual Symposium on VLSI (ISVLSI), 2020, pp. 411–416.
+\bibitem{armstrong2019} ARMSTRONG, A.; BAUEREISS, T.; CAMPBELL, B.; REID, A. ISA Semantics for ARMv8-A, RISC-V, and CHERI-MIPS. Proceedings of the ACM on Programming Languages, 3(POPL), Article 71, 2019.
+\end{thebibliography}
+
+\section{Perspectivas de continuidade ou desdobramento do trabalho (opcional)}
+O desdobramento imediato deste trabalho envolve três linhas de evolução. A primeira mira o aumento da cobertura funcional: incorporar novas extensões e refinar os modelos de geração para contemplar sequências que exercitam interações entre instruções, como dependências de dados e efeitos de controle de fluxo em maior escala. A segunda linha propõe expandir o classificador com perfis personalizados e com um critério de compatibilidade graduado, capaz de distinguir entre compatibilidade estrita (todas as extensões obrigatórias presentes) e compatibilidade contextual (apenas extensões efetivamente utilizadas pelo trecho). A terceira linha busca a integração com fluxos de integração contínua, de modo que a geração e a validação de testes possam ser executadas automaticamente em repositórios de implementações, com relatórios padronizados e comparáveis entre versões.
+\newline
+\noindent Em paralelo, será útil investigar estratégias de geração orientada por feedback, em que resultados do validador ou de um simulador passem a influenciar a escolha de novos casos, priorizando regiões do espaço de teste que exibam maior taxa de inconsistências. Por fim, a documentação e a disponibilização pública do conjunto de ferramentas, acompanhadas de exemplos reprodutíveis, tendem a favorecer a adoção pela comunidade e a formação de um ciclo virtuoso de contribuição e validação cruzada.
+
+\section{Outras atividades de interesse universitário (caso houver)}
+\textit{[preencher, se aplicável]}
+
+\section{Apoio}
+PIBIC/UNICAMP. \textit{[incluir agência de fomento específica, se aplicável]}
+
+\section{Agradecimentos (opcional)}
+À equipe e ao orientador pelo suporte técnico e acadêmico. \textit{[opcional complementar]}
+
+\end{document}
+
+

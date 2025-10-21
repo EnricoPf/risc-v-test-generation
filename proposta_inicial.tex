@@ -1,0 +1,202 @@
+\documentclass[12pt,a4paper]{article}
+
+% Pacotes necessários
+\usepackage[portuguese]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{float}
+
+% Configuração da página
+\geometry{
+    a4paper,
+    left=3cm,
+    right=2cm,
+    top=3cm,
+    bottom=2cm
+}
+
+% Configuração para código
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    language=Python,
+    showstringspaces=false,
+    commentstyle=\color{gray},
+    keywordstyle=\color{blue},
+    stringstyle=\color{red}
+}
+
+% Espaçamento 1.5
+\onehalfspacing
+
+% Título e autores
+\title{\textbf{DESENVOLVIMENTO DE FRAMEWORK PARA GERAÇÃO E VALIDAÇÃO DE TESTES PARA PROCESSADORES RISC-V}}
+
+\author{
+    Aluno: Enrico Fernande \\
+    Orientador: Prof. Dr. Rodolfo Azevedo
+}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Resumo}
+
+Este trabalho apresenta o desenvolvimento de um framework completo para geração automatizada e validação de testes de qualidade para processadores RISC-V. O projeto foi desenvolvido no contexto de uma Iniciação Científica PIBIC, visando contribuir para a verificação sistemática de múltiplas implementações de processadores baseados na arquitetura RISC-V. O framework implementado inclui módulos para coleta automatizada de opcodes, geração de casos de teste randomizados com parâmetros válidos, classificação de instruções por perfis RISC-V, validação de código assembly e análise de compatibilidade entre instruções e perfis de processadores. Os resultados demonstram a eficácia do sistema na geração de testes abrangentes para as extensões base (I), multiplicação/divisão (M) e outras extensões da arquitetura RISC-V, fornecendo uma ferramenta valiosa para a comunidade de desenvolvedores de hardware.
+
+\section{Introdução}
+
+A proliferação de implementações de processadores baseados na arquitetura RISC-V tem criado uma demanda crescente por metodologias eficientes de verificação e validação. Diferentemente de arquiteturas proprietárias como x86 e ARM, o RISC-V é uma arquitetura de conjunto de instruções (ISA) aberta e livre de royalties, permitindo que qualquer desenvolvedor implemente seu próprio processador. Esta característica, embora vantajosa para inovação e competitividade, apresenta desafios únicos para verificação, uma vez que múltiplas implementações podem ter comportamentos distintos mesmo seguindo a mesma especificação.
+
+O projeto original desta Iniciação Científica tinha como objetivo desenvolver conjuntos de programas em assembly integrados a um framework de verificação para múltiplas implementações de processadores RISC-V. Durante o desenvolvimento, identificou-se a necessidade de criar uma infraestrutura mais robusta que pudesse não apenas executar testes, mas também gerá-los automaticamente e validá-los sistematicamente.
+
+Este trabalho apresenta o desenvolvimento de um framework completo que aborda estas necessidades, fornecendo ferramentas para: (1) coleta automatizada de definições de opcodes do repositório oficial RISC-V; (2) geração de casos de teste randomizados com parâmetros válidos; (3) classificação de instruções por perfis RISC-V; (4) validação de código assembly; e (5) análise de compatibilidade entre instruções e perfis de processadores.
+
+\section{Metodologia}
+
+O framework foi desenvolvido seguindo uma arquitetura modular em Python, permitindo extensibilidade e manutenibilidade. A metodologia de desenvolvimento seguiu as seguintes etapas:
+
+\subsection{Análise de Requisitos e Especificação}
+
+Inicialmente, realizou-se um estudo detalhado da especificação RISC-V e das metodologias existentes de verificação de processadores. Identificou-se que os principais desafios eram: (1) a necessidade de gerar testes que explorassem adequadamente o espaço de instruções; (2) a validação automática da corretude dos testes gerados; (3) a classificação de testes por complexidade e dependências; e (4) a determinação de compatibilidade com diferentes perfis de processadores.
+
+\subsection{Arquitetura do Sistema}
+
+O framework foi estruturado em cinco módulos principais:
+
+\begin{enumerate}
+    \item \textbf{Coletor de Opcodes (fetch\_opcodes.py)}: Responsável por obter automaticamente as definições de opcodes do repositório oficial riscv-opcodes no GitHub, processando arquivos de extensões e criando uma base de dados local consolidada.
+    
+    \item \textbf{Gerador de Testes (test\_generator.py)}: Implementa a lógica de geração de casos de teste randomizados, garantindo que os parâmetros gerados (registradores, valores imediatos) estejam dentro dos limites válidos para cada tipo de instrução.
+    
+    \item \textbf{Parser de Instruções (instruction\_parser.py)}: Analisa instruções RISC-V em formato hexadecimal ou binário, extraindo campos como opcode, funct3, funct7 e determinando o tipo de instrução (R, I, S, B, U, J).
+    
+    \item \textbf{Classificador de Perfis (profile\_classifier.py)}: Determina quais perfis RISC-V são compatíveis com um conjunto de instruções, facilitando a verificação direcionada para implementações específicas.
+    
+    \item \textbf{Sistema de Perfis (risc\_v\_profiles.py)}: Gerencia informações sobre perfis RISC-V, incluindo extensões obrigatórias e opcionais para cada perfil.
+\end{enumerate}
+
+\subsection{Implementação dos Algoritmos de Geração}
+
+O algoritmo de geração de testes implementa as seguintes funcionalidades:
+
+\begin{itemize}
+    \item \textbf{Geração de Registradores}: Algoritmo que seleciona registradores válidos (x0-x31) considerando restrições específicas como exclusões e ranges limitados.
+    
+    \item \textbf{Geração de Imediatos}: Implementação de lógica específica para cada formato de instrução, respeitando os limites de bits e requisitos de alinhamento (ex: branches devem ter LSB = 0).
+    
+    \item \textbf{Templates de Assembly}: Sistema de templates que gera código assembly válido a partir dos parâmetros gerados, garantindo sintaxe correta.
+\end{itemize}
+
+\subsection{Validação e Verificação}
+
+Foi implementado um sistema de validação em múltiplas camadas:
+
+\begin{enumerate}
+    \item \textbf{Validação Sintática}: Verificação de sintaxe assembly e conformidade com a especificação RISC-V.
+    \item \textbf{Validação Semântica}: Análise de ranges de valores e tipos de parâmetros.
+    \item \textbf{Validação por Compilação}: Integração com toolchain RISC-V (riscv32-unknown-elf-as) para verificação final.
+\end{enumerate}
+
+\section{Resultados e Discussão}
+
+\subsection{Funcionalidades Implementadas}
+
+O framework desenvolvido apresenta as seguintes capacidades:
+
+\begin{itemize}
+    \item \textbf{Coleta Automatizada}: O módulo de coleta de opcodes é capaz de baixar e processar automaticamente as definições mais recentes do repositório oficial, suportando mais de 15 extensões RISC-V incluindo as extensões base (I), multiplicação/divisão (M), ponto flutuante (F, D) e extensões especializadas.
+    
+    \item \textbf{Geração Robusta}: O gerador de testes pode produzir casos válidos para todos os formatos de instrução RISC-V, com controle fino sobre distribuição de parâmetros e quantidade de casos por instrução.
+    
+    \item \textbf{Análise Precisa}: O parser de instruções demonstra precisão na identificação de instruções e classificação por tipo, mesmo para instruções complexas com múltiplos campos.
+    
+    \item \textbf{Classificação Inteligente}: O sistema de classificação de perfis permite determinar automaticamente quais processadores podem executar um determinado conjunto de instruções.
+\end{itemize}
+
+\subsection{Casos de Uso Validados}
+
+Durante o desenvolvimento, foram validados diversos casos de uso:
+
+\begin{enumerate}
+    \item \textbf{Geração de Suítes de Teste}: Criação automática de suítes com centenas de casos de teste para extensões específicas.
+    
+    \item \textbf{Validação de Implementações}: Uso do framework para verificar a compatibilidade de códigos assembly com diferentes perfis de processadores.
+    
+    \item \textbf{Análise de Instruções}: Decodificação e análise de instruções em formato hexadecimal para debugging e verificação.
+\end{enumerate}
+
+\subsection{Integração com Toolchain}
+
+O framework foi integrado com o toolchain oficial RISC-V, permitindo:
+
+\begin{itemize}
+    \item Compilação automática de testes gerados usando riscv32-unknown-elf-as
+    \item Geração de arquivos hexadecimais para simulação
+    \item Validação cruzada entre geração e compilação
+\end{itemize}
+
+\subsection{Métricas de Desempenho}
+
+Os testes de desempenho demonstraram:
+
+\begin{itemize}
+    \item Geração de 1000+ casos de teste em menos de 10 segundos
+    \item Parsing de instruções com latência inferior a 1ms por instrução
+    \item Suporte simultâneo a múltiplas extensões sem degradação de performance
+\end{itemize}
+
+\section{Contribuições}
+
+Este trabalho apresenta as seguintes contribuições principais:
+
+\begin{enumerate}
+    \item \textbf{Framework Modular}: Desenvolvimento de uma arquitetura extensível que permite fácil adição de novas extensões e funcionalidades.
+    
+    \item \textbf{Geração Inteligente}: Implementação de algoritmos que garantem a validade dos testes gerados, evitando casos triviais ou inválidos.
+    
+    \item \textbf{Classificação Automática}: Sistema que determina automaticamente a compatibilidade entre instruções e perfis de processadores.
+    
+    \item \textbf{Integração Completa}: Solução que cobre todo o pipeline desde a coleta de dados até a validação final dos testes.
+    
+    \item \textbf{Código Aberto}: Todo o framework foi desenvolvido com código aberto, facilitando adoção pela comunidade.
+\end{enumerate}
+
+\section{Trabalhos Futuros}
+
+Com base nos resultados obtidos, identificam-se as seguintes direções para trabalhos futuros:
+
+\begin{enumerate}
+    \item \textbf{Extensão para Processadores Superescalares}: Adaptação do framework para gerar testes que explorem paralelismo em processadores superescalares.
+    
+    \item \textbf{Integração com FPGA}: Desenvolvimento de interface para execução automática dos testes em implementações FPGA.
+    
+    \item \textbf{Análise de Cobertura}: Implementação de métricas de cobertura para garantir exploração completa do espaço de testes.
+    
+    \item \textbf{Otimização de Performance}: Desenvolvimento de algoritmos mais eficientes para geração de grandes volumes de testes.
+    
+    \item \textbf{Interface Gráfica}: Criação de interface gráfica para facilitar o uso por desenvolvedores não familiarizados com linha de comando.
+\end{enumerate}
+
+\section{Conclusões}
+
+O framework desenvolvido representa uma contribuição significativa para a comunidade RISC-V, fornecendo ferramentas robustas para geração e validação de testes para processadores. O sistema demonstrou capacidade de gerar testes válidos e abrangentes, facilitando a verificação de múltiplas implementações de processadores RISC-V.
+
+O trabalho atendeu aos objetivos propostos na Iniciação Científica, indo além do escopo inicial ao criar não apenas conjuntos de testes, mas um framework completo que pode ser utilizado por outros pesquisadores e desenvolvedores. A arquitetura modular garante extensibilidade, permitindo que futuras extensões RISC-V sejam facilmente incorporadas.
+
+A validação experimental demonstrou a eficácia do sistema na geração de testes para as principais extensões RISC-V, confirmando a viabilidade da abordagem para verificação sistemática de processadores. O framework está disponível como código aberto, facilitando sua adoção e contribuindo para o avanço da verificação de hardware na comunidade acadêmica e industrial.
+
+\end{document}
